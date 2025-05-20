@@ -1,10 +1,11 @@
-# 学生问卷分析与报告生成系统
+# 学生问卷分析与报告生成系统 (Web版)
 
-这个系统可以自动分析学生填写的问卷，并利用GPT-4o生成个性化的学习分析报告。系统会生成两种报告：一种是面向学生的报告，一种是内部使用的详细分析报告。
+这个系统是一个完整的Web应用，可以部署在服务器上，实现问卷的在线填写、自动分析和报告生成。系统可以根据学生填写的问卷，利用GPT-4o生成个性化的学习分析报告，包括面向学生的报告和面向内部使用的详细分析报告。
 
 ## 功能特点
 
-- 自动处理问卷数据（CSV或Excel格式）
+- 提供在线问卷填写界面
+- 自动处理提交的问卷数据
 - 使用GPT-4o分析学生情况
 - 推断学生的MBTI性格类型
 - 评估学生的学习状况和潜在问题
@@ -12,10 +13,12 @@
 - 评估家庭支持和经济状况
 - 生成个性化学习建议
 - 创建两种不同的报告（学生版和内部版）
+- 管理面板查看和管理所有问卷
 
 ## 环境要求
 
 - Python 3.6+
+- Flask 2.0+
 - OpenAI API密钥
 
 ## 安装依赖
@@ -24,38 +27,85 @@
 pip install -r requirements.txt
 ```
 
-## 使用方法
+## 快速开始
 
-1. 将学生问卷数据（CSV或Excel格式）放入`input`文件夹中
-2. 设置OpenAI API密钥（两种方式）：
-   - 方式一：创建`.env`文件并添加以下内容：
-     ```
-     OPENAI_API_KEY=your_api_key_here
-     MODEL=gpt-4o  # 可选，默认为gpt-4o
-     ```
-   - 方式二：通过环境变量设置
-     ```bash
-     export OPENAI_API_KEY='your-api-key'
-     ```
-3. 运行主程序
+1. 克隆项目
    ```bash
-   python main.py
+   git clone <仓库地址>
+   cd GDS_auto_questionnaire
    ```
-4. 生成的报告将保存在以下位置：
-   - 学生报告：`output/student_reports/`
-   - 内部报告：`output/internal_reports/`
-   - 原始分析数据：`output/`
 
-## 问卷格式
+2. 设置OpenAI API密钥
+   创建`.env`文件并添加：
+   ```
+   OPENAI_API_KEY=your_api_key_here
+   MODEL=gpt-4o  # 可选，默认为gpt-4o
+   FLASK_DEBUG=True  # 开发环境设置
+   SECRET_KEY=your_secret_key  # Flask会话密钥
+   ```
 
-问卷可以是CSV或Excel格式，包含问题和答案。可以使用两种格式：
+3. 启动Web服务器
+   ```bash
+   # 开发环境
+   python app.py
+   
+   # 生产环境
+   gunicorn app:app -b 0.0.0.0:5000 -w 4
+   ```
 
-1. 表头为问题，一行数据为答案
-2. 两列格式：第一列为问题，第二列为回答
+4. 访问问卷系统
+   - 问卷填写: http://localhost:5000/
+   - 管理员面板: http://localhost:5000/admin
 
-示例文件`input/example_questionnaire.csv`和`input/detailed_questionnaire.csv`提供了参考格式。
+## 项目结构
 
-## 输出示例
+```
+GDS_auto_questionnaire/
+├── app.py                 # Flask应用主程序
+├── analysis_engine.py     # 问卷分析引擎
+├── requirements.txt       # 依赖列表
+├── .env                   # 环境变量配置
+├── original_questionnaire/ # 原始问卷数据
+├── output/                # 生成的报告
+│   ├── student_reports/   # 学生版报告
+│   └── internal_reports/  # 内部版报告
+├── static/                # 静态资源
+│   ├── css/               # CSS样式
+│   └── js/                # JavaScript脚本
+└── templates/             # HTML模板
+    ├── questionnaire.html # 问卷页面
+    ├── result.html        # 提交成功页面
+    ├── student_report.html # 学生报告查看页面
+    ├── internal_report.html # 内部报告查看页面
+    └── admin.html         # 管理员面板
+```
+
+## 使用指南
+
+### 学生使用流程
+
+1. 访问系统首页填写问卷
+2. 提交问卷后等待分析完成
+3. 查看个性化学习分析报告
+
+### 管理员使用流程
+
+1. 访问管理员面板查看所有提交的问卷
+2. 查看学生报告和内部报告
+3. 下载原始问卷数据
+4. 必要时重新分析问卷
+
+## 问卷内容
+
+问卷包含以下几个部分：
+- 基本信息（姓名、年龄、性别、年级等）
+- 学习情况（擅长科目、薄弱科目、成绩情况等）
+- 性格与自我认知
+- 学习习惯与挑战
+- 家庭支持与教育投入
+- 其他信息
+
+## 报告内容
 
 ### 学生报告
 
@@ -77,9 +127,15 @@ pip install -r requirements.txt
 - 产品推荐和理由
 - 跟进建议
 
+## 自定义与扩展
+
+- 修改`templates/questionnaire.html`可以自定义问卷问题
+- 调整`analysis_engine.py`中的分析逻辑和提示词
+- 编辑报告模板以适应不同的需求
+
 ## 注意事项
 
-- 程序会自动处理`input`文件夹中最新的问卷文件
-- 确保问卷数据尽可能完整，以便获得更准确的分析
+- 确保服务器安全配置，特别是管理员面板需要添加适当的访问控制
 - API调用可能产生费用，请注意控制使用频率
-- 分析结果仅供参考，不应替代专业教育顾问的建议 
+- 分析结果仅供参考，不应替代专业教育顾问的建议
+- 为保护隐私，建议使用HTTPS协议并实施适当的数据保护措施 

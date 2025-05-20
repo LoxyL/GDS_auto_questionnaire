@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ student_name }} - 学习分析报告</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .markdown-body {
+            padding: 25px;
+            background-color: white;
+            border-radius: 12px;
+        }
+        
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            .card {
+                border: none !important;
+                box-shadow: none !important;
+            }
+            
+            .markdown-body {
+                padding: 0;
+            }
+            
+            body {
+                background-color: white !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="card shadow mb-5">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center no-print">
+                <h1 class="mb-0">个人学习分析报告</h1>
+                <div>
+                    <button class="btn btn-light" onclick="window.print()">
+                        <i class="bi bi-printer"></i> 打印报告
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="markdown-body">
+                    {{ report_content | safe }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-center gap-3 no-print">
+            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-house"></i> 返回首页
+            </a>
+            <button class="btn btn-outline-primary" onclick="window.print()">
+                <i class="bi bi-printer"></i> 打印报告
+            </button>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.0.0/marked.min.js"></script>
+    <script>
+        // 转换Markdown格式（如果需要的话）
+        // 注意：由于Flask已经使用Jinja2的safe过滤器渲染了内容，
+        // 这个处理可能并不需要，视具体情况而定
+        /*
+        document.addEventListener('DOMContentLoaded', function() {
+            const markdownContent = document.querySelector('.markdown-content');
+            if (markdownContent) {
+                const rawMarkdown = markdownContent.textContent;
+                markdownContent.innerHTML = marked.parse(rawMarkdown);
+            }
+        });
+        */
+    </script>
+</body>
+</html> 

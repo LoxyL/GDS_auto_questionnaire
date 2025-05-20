@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员面板 - 问卷分析系统</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.1/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .admin-header {
+            background-color: #212529;
+            color: white;
+            padding: 20px 0;
+        }
+        
+        .action-buttons .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .badge-success {
+            background-color: #198754;
+        }
+        
+        .badge-danger {
+            background-color: #dc3545;
+        }
+        
+        .badge-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3">问卷分析系统 - 管理面板</h1>
+                <div>
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-house"></i> 问卷首页
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h2 class="h4 mb-0">已提交的问卷列表</h2>
+            </div>
+            <div class="card-body">
+                {% if questionnaires %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover" id="questionnaires-table">
+                            <thead>
+                                <tr>
+                                    <th>提交时间</th>
+                                    <th>学生姓名</th>
+                                    <th>报告状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for questionnaire in questionnaires %}
+                                    <tr>
+                                        <td>{{ questionnaire.timestamp }}</td>
+                                        <td>{{ questionnaire.student_name }}</td>
+                                        <td>
+                                            {% if questionnaire.student_report_exists and questionnaire.internal_report_exists %}
+                                                <span class="badge bg-success">已生成报告</span>
+                                            {% elif questionnaire.student_report_exists or questionnaire.internal_report_exists %}
+                                                <span class="badge bg-warning">部分报告已生成</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">未生成报告</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="action-buttons">
+                                            <div class="btn-group">
+                                                <a href="{{ url_for('download_csv', filename=questionnaire.file) }}" class="btn btn-outline-secondary">
+                                                    <i class="bi bi-download"></i> 下载CSV
+                                                </a>
+                                                {% if questionnaire.student_report_exists %}
+                                                    <a href="{{ url_for('view_student_report', timestamp=questionnaire.timestamp, student_name=questionnaire.student_name) }}" class="btn btn-outline-primary">
+                                                        <i class="bi bi-file-earmark-text"></i> 学生报告
+                                                    </a>
+                                                {% endif %}
+                                                {% if questionnaire.internal_report_exists %}
+                                                    <a href="{{ url_for('view_internal_report', timestamp=questionnaire.timestamp, student_name=questionnaire.student_name) }}" class="btn btn-outline-danger">
+                                                        <i class="bi bi-file-earmark-lock"></i> 内部报告
+                                                    </a>
+                                                {% endif %}
+                                                <a href="{{ url_for('reanalyze_questionnaire', filename=questionnaire.file) }}" class="btn btn-outline-success">
+                                                    <i class="bi bi-arrow-repeat"></i> 重新分析
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        目前尚未有问卷提交。
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h2 class="h4 mb-0">系统信息</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">问卷统计</h5>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        总问卷数
+                                        <span class="badge bg-primary rounded-pill">{{ questionnaires|length }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        已完成分析
+                                        <span class="badge bg-success rounded-pill">
+                                            {{ questionnaires|selectattr('student_report_exists', 'true')|list|length }}
+                                        </span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        待分析问卷
+                                        <span class="badge bg-danger rounded-pill">
+                                            {{ questionnaires|rejectattr('student_report_exists', 'true')|list|length }}
+                                        </span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">快速操作</h5>
+                                <div class="d-grid gap-2">
+                                    <a href="{{ url_for('index') }}" class="btn btn-primary">
+                                        <i class="bi bi-plus-circle"></i> 新建问卷
+                                    </a>
+                                    <button class="btn btn-warning" id="batch-analyze-btn">
+                                        <i class="bi bi-lightning"></i> 批量分析待处理问卷
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.1/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 初始化数据表格
+            $('#questionnaires-table').DataTable({
+                order: [[0, 'desc']],  // 按时间戳降序排序
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/zh.json'
+                }
+            });
+            
+            // 批量分析功能（待实现）
+            $('#batch-analyze-btn').click(function() {
+                if (confirm('确定要批量分析所有待处理的问卷吗？这可能需要一些时间。')) {
+                    alert('此功能尚未实现，将在后续版本中添加。');
+                    // TODO: 实现批量分析功能
+                    // window.location.href = "{{ url_for('batch_analyze') }}";
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

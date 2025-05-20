@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ student_name }} - 内部分析报告</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .markdown-body {
+            padding: 25px;
+            background-color: white;
+            border-radius: 12px;
+        }
+        
+        .confidential-banner {
+            background-color: #dc3545;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border-radius: 0 0 12px 12px;
+        }
+        
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            .card {
+                border: none !important;
+                box-shadow: none !important;
+            }
+            
+            .markdown-body {
+                padding: 0;
+            }
+            
+            body {
+                background-color: white !important;
+            }
+            
+            .confidential-banner {
+                background-color: #dc3545 !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="card shadow mb-5">
+            <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center no-print">
+                <h1 class="mb-0">内部分析报告</h1>
+                <div>
+                    <button class="btn btn-light" onclick="window.print()">
+                        <i class="bi bi-printer"></i> 打印报告
+                    </button>
+                </div>
+            </div>
+            <div class="confidential-banner">
+                内部文件 - 仅限教育顾问查阅 - 请勿向学生或家长展示
+            </div>
+            <div class="card-body p-0">
+                <div class="markdown-body">
+                    {{ report_content | safe }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-center gap-3 no-print">
+            <a href="{{ url_for('admin_panel') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-list-check"></i> 返回管理面板
+            </a>
+            <a href="{{ url_for('view_student_report', timestamp=timestamp, student_name=student_name) }}" class="btn btn-outline-primary">
+                <i class="bi bi-file-earmark-person"></i> 查看学生版报告
+            </a>
+            <button class="btn btn-outline-danger" onclick="window.print()">
+                <i class="bi bi-printer"></i> 打印报告
+            </button>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.0.0/marked.min.js"></script>
+</body>
+</html> 
