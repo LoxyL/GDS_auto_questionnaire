@@ -222,5 +222,12 @@ def reanalyze_questionnaire(filename):
 
 # 启动应用
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 433))
-    app.run(host='0.0.0.0', port=port, debug=os.environ.get('FLASK_DEBUG', 'False').lower() == 'true') 
+    port = int(os.environ.get('PORT', 443))
+    
+    # 绑定到0.0.0.0使应用可以从外部访问
+    # 生产环境中应确保设置了适当的安全措施
+    app.run(
+        host='0.0.0.0',  # 绑定到所有网络接口，允许远程访问
+        port=port,
+        debug=os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    ) 

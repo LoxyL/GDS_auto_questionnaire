@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学生个性化学习分析问卷</title>
+    <title>高中生学习情况分析问卷</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
@@ -11,7 +11,7 @@
     <div class="container py-5">
         <div class="card shadow mb-5">
             <div class="card-header bg-primary text-white">
-                <h1 class="text-center">学生个性化学习分析问卷</h1>
+                <h1 class="text-center">高中生学习情况分析问卷</h1>
             </div>
             <div class="card-body">
                 <div class="alert alert-info">
@@ -33,54 +33,48 @@
                             <h3>基本信息</h3>
                         </div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <label for="name" class="form-label">姓名<span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="name" name="姓名" required>
-                                    <div class="invalid-feedback">请填写您的姓名</div>
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <label for="age" class="form-label">年龄<span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" id="age" name="年龄" min="6" max="30" required>
-                                    <div class="invalid-feedback">请填写有效的年龄</div>
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <label for="gender" class="form-label">性别<span class="text-danger">*</span></label>
-                                    <select class="form-select" id="gender" name="性别" required>
-                                        <option value="" selected disabled>请选择</option>
-                                        <option value="男">男</option>
-                                        <option value="女">女</option>
-                                        <option value="其他">其他</option>
-                                    </select>
-                                    <div class="invalid-feedback">请选择您的性别</div>
-                                </div>
+                            <div class="mb-3">
+                                <label for="name" class="form-label">1. 姓名<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="name" name="姓名" required>
+                                <div class="invalid-feedback">请填写您的姓名</div>
                             </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="grade" class="form-label">年级<span class="text-danger">*</span></label>
-                                    <select class="form-select" id="grade" name="年级" required>
-                                        <option value="" selected disabled>请选择</option>
-                                        <option value="小学一年级">小学一年级</option>
-                                        <option value="小学二年级">小学二年级</option>
-                                        <option value="小学三年级">小学三年级</option>
-                                        <option value="小学四年级">小学四年级</option>
-                                        <option value="小学五年级">小学五年级</option>
-                                        <option value="小学六年级">小学六年级</option>
-                                        <option value="初一">初一</option>
-                                        <option value="初二">初二</option>
-                                        <option value="初三">初三</option>
-                                        <option value="高一">高一</option>
-                                        <option value="高二">高二</option>
-                                        <option value="高三">高三</option>
-                                        <option value="大学">大学</option>
-                                        <option value="其他">其他</option>
-                                    </select>
-                                    <div class="invalid-feedback">请选择您的年级</div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="school" class="form-label">所在学校</label>
-                                    <input type="text" class="form-control" id="school" name="学校">
-                                </div>
+                            <div class="mb-3">
+                                <label for="province" class="form-label">2. 你所在的省份<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="province" name="你所在的省份" required>
+                                <div class="invalid-feedback">请填写您所在的省份</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="residence" class="form-label">3. 你的家庭居住地属于以下哪种类型？<span class="text-danger">*</span></label>
+                                <select class="form-select" id="residence" name="你的家庭居住地属于以下哪种类型？" required>
+                                    <option value="" selected disabled>请选择</option>
+                                    <option value="城市（地级市及以上城区）">城市（地级市及以上城区）</option>
+                                    <option value="城镇（县、县级市、镇中心区）">城镇（县、县级市、镇中心区）</option>
+                                    <option value="农村（乡村、行政村、自然村）">农村（乡村、行政村、自然村）</option>
+                                    <option value="其他">其他（请说明）</option>
+                                </select>
+                                <div class="invalid-feedback">请选择您的居住地类型</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="school_type" class="form-label">4. 你目前就读的高中属于以下哪个类型？<span class="text-danger">*</span></label>
+                                <select class="form-select" id="school_type" name="你目前就读的高中属于以下哪个类型？" required>
+                                    <option value="" selected disabled>请选择</option>
+                                    <option value="省重点高中">省重点高中</option>
+                                    <option value="市重点高中">市重点高中</option>
+                                    <option value="区（县）重点高中">区（县）重点高中</option>
+                                    <option value="普通高中">普通高中</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                                <div class="invalid-feedback">请选择您就读的高中类型</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="grade" class="form-label">5. 你的年级是：<span class="text-danger">*</span></label>
+                                <select class="form-select" id="grade" name="你的年级是" required>
+                                    <option value="" selected disabled>请选择</option>
+                                    <option value="高一">高一</option>
+                                    <option value="高二">高二</option>
+                                    <option value="高三">高三</option>
+                                </select>
+                                <div class="invalid-feedback">请选择您的年级</div>
                             </div>
                         </div>
                     </div>
@@ -92,175 +86,182 @@
                         </div>
                         <div class="card-body">
                             <div class="mb-3">
-                                <label for="strong_subjects" class="form-label">你擅长的学科有哪些？<span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="strong_subjects" name="你擅长的学科有哪些？" required>
-                                <div class="form-text">例如：数学、英语、物理等，多个科目用逗号分隔</div>
-                                <div class="invalid-feedback">请填写您擅长的学科</div>
+                                <label for="advantage_subjects" class="form-label">6. 你的优势科目属于哪种类型？<span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="advantage_subjects" name="你的优势科目属于哪种类型？请具体说明" rows="2" required></textarea>
+                                <div class="form-text">例如：偏理科但数学好物理差</div>
+                                <div class="invalid-feedback">请描述您的优势科目</div>
                             </div>
                             <div class="mb-3">
-                                <label for="weak_subjects" class="form-label">你觉得哪些学科比较困难？<span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="weak_subjects" name="你觉得哪些学科比较困难？" required>
-                                <div class="form-text">例如：化学、语文等，多个科目用逗号分隔</div>
-                                <div class="invalid-feedback">请填写您觉得困难的学科</div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="avg_score" class="form-label">你的平均成绩大概是多少？<span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="avg_score" name="你的平均成绩大概是多少？" required>
-                                <div class="form-text">例如：班级前10名、总分500分左右（满分600）、平均90分等</div>
-                                <div class="invalid-feedback">请填写您的平均成绩情况</div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="expected_score" class="form-label">你期望能达到的分数是？</label>
-                                <input type="text" class="form-control" id="expected_score" name="你期望能达到的分数是？">
-                                <div class="form-text">例如：班级前5名、总分550分以上、平均95分等</div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="target_school" class="form-label">你的目标学校是？</label>
-                                <input type="text" class="form-control" id="target_school" name="你的目标学校是？">
-                            </div>
-                            <div class="mb-3">
-                                <label for="study_time" class="form-label">你每天大概花多少时间学习？<span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="study_time" name="你每天大概花多少时间学习？" required>
-                                <div class="form-text">例如：课后约2-3小时</div>
-                                <div class="invalid-feedback">请填写您的学习时间</div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="activities" class="form-label">你参加了哪些课外活动？</label>
-                                <input type="text" class="form-control" id="activities" name="你参加了哪些课外活动？">
-                            </div>
-                            <div class="mb-3">
-                                <label for="hobbies" class="form-label">你的兴趣爱好是什么？</label>
-                                <input type="text" class="form-control" id="hobbies" name="你的兴趣爱好是什么？">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 性格与自我认知 -->
-                    <div class="card mb-4">
-                        <div class="card-header bg-light">
-                            <h3>性格与自我认知</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label for="personality" class="form-label">你认为自己是什么性格？<span class="text-danger">*</span></label>
-                                <textarea class="form-control" id="personality" name="你认为自己是什么性格？" rows="2" required></textarea>
-                                <div class="form-text">例如：内向、外向、细心、粗心、独立思考、随和等</div>
-                                <div class="invalid-feedback">请描述您的性格特点</div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="motivation" class="form-label">你学习的动力主要来自哪里？</label>
-                                <textarea class="form-control" id="motivation" name="你学习的动力主要来自哪里？" rows="2"></textarea>
-                                <div class="form-text">例如：兴趣、家庭期望、未来规划等</div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="challenges" class="form-label">面对挫折时你通常如何应对？</label>
-                                <textarea class="form-control" id="challenges" name="面对挫折时你通常如何应对？" rows="2"></textarea>
-                            </div>
-                            <div class="mb-3">
-                                <label for="learning_style" class="form-label">你更喜欢什么样的学习方式？</label>
-                                <textarea class="form-control" id="learning_style" name="你更喜欢什么样的学习方式？" rows="2"></textarea>
-                                <div class="form-text">例如：系统讲解、自学、视频教程、小组讨论等</div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="exam_anxiety" class="form-label">考试前你会感到紧张吗？</label>
-                                <select class="form-select" id="exam_anxiety" name="考试前你会感到紧张吗？">
+                                <label for="grade_level" class="form-label">7. 你目前的综合成绩在年级中大致处于什么水平？<span class="text-danger">*</span></label>
+                                <select class="form-select" id="grade_level" name="你目前的综合成绩在年级中大致处于什么水平？" required>
                                     <option value="" selected disabled>请选择</option>
-                                    <option value="非常紧张，常失眠">非常紧张，常失眠</option>
-                                    <option value="比较紧张，但能控制">比较紧张，但能控制</option>
-                                    <option value="稍微紧张">稍微紧张</option>
-                                    <option value="基本不紧张">基本不紧张</option>
+                                    <option value="名列前茅（年级前10%）">名列前茅（年级前10%）</option>
+                                    <option value="中上水平（前11%-30%）">中上水平（前11%-30%）</option>
+                                    <option value="中等水平（中间31%-60%）">中等水平（中间31%-60%）</option>
+                                    <option value="仍需努力（后61%-90%）">仍需努力（后61%-90%）</option>
+                                    <option value="目前落后（后10%）">目前落后（后10%）</option>
                                 </select>
+                                <div class="invalid-feedback">请选择您的成绩水平</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="target_university" class="form-label">8. 你是否有明确的目标大学或专业？<span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="target_university" name="你是否有明确的目标大学或专业？请描述" rows="2" required></textarea>
+                                <div class="form-text">若无，可写"无"</div>
+                                <div class="invalid-feedback">请填写您的目标（无目标请填写"无"）</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="motivation" class="form-label">9. 请用1-2句话描述你最主要的学习动力来源<span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="motivation" name="请用1-2句话描述你最主要的学习动力来源" rows="2" required></textarea>
+                                <div class="form-text">例如：自我兴趣、家长期望等</div>
+                                <div class="invalid-feedback">请描述您的学习动力</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 学习习惯与挑战 -->
+                    <!-- 学习习惯与方法 -->
                     <div class="card mb-4">
                         <div class="card-header bg-light">
-                            <h3>学习习惯与挑战</h3>
+                            <h3>学习习惯与方法</h3>
                         </div>
                         <div class="card-body">
                             <div class="mb-3">
-                                <label for="study_habits" class="form-label">你平时的学习习惯是怎样的？<span class="text-danger">*</span></label>
-                                <textarea class="form-control" id="study_habits" name="你平时的学习习惯是怎样的？" rows="2" required></textarea>
-                                <div class="form-text">例如：喜欢提前预习、经常复习、做笔记的方式等</div>
-                                <div class="invalid-feedback">请描述您的学习习惯</div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="difficulties" class="form-label">最近学习中遇到的主要困难是？<span class="text-danger">*</span></label>
-                                <textarea class="form-control" id="difficulties" name="最近学习中遇到的主要困难是？" rows="2" required></textarea>
-                                <div class="invalid-feedback">请描述您遇到的学习困难</div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="tutoring" class="form-label">你现在有参加校外补习班吗？</label>
-                                <input type="text" class="form-control" id="tutoring" name="你现在有参加校外补习班吗？">
-                                <div class="form-text">如有，请说明补习的科目和频率</div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="improvement" class="form-label">你最希望提高的能力是什么？<span class="text-danger">*</span></label>
-                                <textarea class="form-control" id="improvement" name="你最希望提高的能力是什么？" rows="2" required></textarea>
-                                <div class="invalid-feedback">请填写您希望提高的能力</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 家庭支持与教育投入 -->
-                    <div class="card mb-4">
-                        <div class="card-header bg-light">
-                            <h3>家庭支持与教育投入</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label for="family_support" class="form-label">你的家人对你的学习态度如何？</label>
-                                <select class="form-select" id="family_support" name="你的家人对你的学习态度如何？">
+                                <label for="study_time" class="form-label">10. 除学校安排的课程和作业外，你平均每天自主投入多少时间进行学习？<span class="text-danger">*</span></label>
+                                <select class="form-select" id="study_time" name="除学校安排的课程和作业外，你平均每天自主投入多少时间进行学习？" required>
                                     <option value="" selected disabled>请选择</option>
-                                    <option value="非常支持，经常辅导">非常支持，经常辅导</option>
-                                    <option value="比较支持，有时辅导">比较支持，有时辅导</option>
-                                    <option value="一般支持，很少辅导">一般支持，很少辅导</option>
-                                    <option value="不太关注">不太关注</option>
+                                    <option value="少于30分钟">少于30分钟</option>
+                                    <option value="30分钟-1小时">30分钟-1小时</option>
+                                    <option value="1-2小时">1-2小时</option>
+                                    <option value="2-3小时">2-3小时</option>
+                                    <option value="超过3小时">超过3小时</option>
                                 </select>
+                                <div class="invalid-feedback">请选择您的自主学习时间</div>
                             </div>
                             <div class="mb-3">
-                                <label for="economic_status" class="form-label">你的家庭经济状况如何？</label>
-                                <select class="form-select" id="economic_status" name="你的家庭经济状况如何？">
+                                <label for="study_plan" class="form-label">11. 你是否有固定的学习计划？<span class="text-danger">*</span></label>
+                                <select class="form-select" id="study_plan" name="你是否有固定的学习计划？" required>
                                     <option value="" selected disabled>请选择</option>
-                                    <option value="非常宽裕">非常宽裕</option>
-                                    <option value="比较宽裕">比较宽裕</option>
-                                    <option value="一般">一般</option>
-                                    <option value="比较紧张">比较紧张</option>
-                                    <option value="不方便透露">不方便透露</option>
+                                    <option value="有详细计划且能严格执行">有详细计划且能严格执行</option>
+                                    <option value="有大致计划，但执行得一般">有大致计划，但执行得一般</option>
+                                    <option value="偶尔会计划，但很难坚持">偶尔会计划，但很难坚持</option>
+                                    <option value="无计划，随意学习">无计划，随意学习</option>
                                 </select>
+                                <div class="invalid-feedback">请选择您的学习计划情况</div>
                             </div>
                             <div class="mb-3">
-                                <label for="education_products" class="form-label">你对教育辅导产品的看法是？</label>
-                                <textarea class="form-control" id="education_products" name="你对教育辅导产品的看法是？" rows="2"></textarea>
-                                <div class="form-text">例如：愿意尝试高质量辅导、对价格比较敏感等</div>
+                                <label for="problem_solving" class="form-label">12. 遇到难题时，你最常用的方法是什么？<span class="text-danger">*</span></label>
+                                <select class="form-select" id="problem_solving" name="遇到难题时，你最常用的方法是什么？" required>
+                                    <option value="" selected disabled>请选择</option>
+                                    <option value="坚持自己思考，尝试用不同的方法/技巧解题">坚持自己思考，尝试用不同的方法/技巧解题</option>
+                                    <option value="查阅资料或参考答案学习">查阅资料或参考答案学习</option>
+                                    <option value="向老师请教或和同学讨论">向老师请教或和同学讨论</option>
+                                    <option value="暂时跳过，觉得没必要纠结">暂时跳过，觉得没必要纠结</option>
+                                    <option value="其他">其他（请说明）</option>
+                                </select>
+                                <div class="invalid-feedback">请选择您解决难题的方法</div>
                             </div>
                             <div class="mb-3">
-                                <label for="budget" class="form-label">你愿意为提高成绩投入多少预算？</label>
-                                <input type="text" class="form-control" id="budget" name="你愿意为提高成绩投入多少预算？">
-                                <div class="form-text">例如：每月1000元以下、视效果而定等</div>
+                                <label for="error_handling" class="form-label">13. 完成作业或练习后，你通常会如何处理错误？<span class="text-danger">*</span></label>
+                                <select class="form-select" id="error_handling" name="完成作业或练习后，你通常会如何处理错误？" required>
+                                    <option value="" selected disabled>请选择</option>
+                                    <option value="认真分析错误原因，并记录下来，争取下次不再犯">认真分析错误原因，并记录下来，争取下次不再犯</option>
+                                    <option value="看一下正确答案就过去了">看一下正确答案就过去了</option>
+                                    <option value="很少主动订正错误，或者不知道如何订正">很少主动订正错误，或者不知道如何订正</option>
+                                    <option value="错误太多，感觉无从下手">错误太多，感觉无从下手</option>
+                                </select>
+                                <div class="invalid-feedback">请选择您处理错误的方式</div>
                             </div>
                             <div class="mb-3">
-                                <label for="online_learning" class="form-label">你是否曾使用过在线学习平台？如果有，是哪些？</label>
-                                <input type="text" class="form-control" id="online_learning" name="你是否曾使用过在线学习平台？如果有，是哪些？">
+                                <label for="review_habits" class="form-label">14. 你是否会定期复习已学过的知识/错题？<span class="text-danger">*</span></label>
+                                <select class="form-select" id="review_habits" name="你是否会定期复习已学过的知识/错题？" required>
+                                    <option value="" selected disabled>请选择</option>
+                                    <option value="经常会，有固定的复习周期">经常会，有固定的复习周期</option>
+                                    <option value="有时会，想起来就复习一下">有时会，想起来就复习一下</option>
+                                    <option value="很少主动复习，除非老师要求">很少主动复习，除非老师要求</option>
+                                    <option value="基本不复习">基本不复习</option>
+                                </select>
+                                <div class="invalid-feedback">请选择您的复习习惯</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="efficient_learning" class="form-label">15. 请描述你最高效的一次学习经历<span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="efficient_learning" name="请描述你最高效的一次学习经历" rows="3" required></textarea>
+                                <div class="form-text">当时的环境/方法/状态等</div>
+                                <div class="invalid-feedback">请描述您的高效学习经历</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 其他信息 -->
+                    <!-- 家庭支持与个人特点 -->
                     <div class="card mb-4">
                         <div class="card-header bg-light">
-                            <h3>其他信息</h3>
+                            <h3>家庭支持与个人特点</h3>
                         </div>
                         <div class="card-body">
                             <div class="mb-3">
-                                <label for="career_plan" class="form-label">你对未来的职业规划是什么？</label>
-                                <textarea class="form-control" id="career_plan" name="你对未来的职业规划是什么？" rows="2"></textarea>
+                                <label for="family_support" class="form-label">16. 你的家庭是否为你提供过以下学习支持？<span class="text-danger">*</span></label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="support1" name="家庭学习支持[]" value="课外辅导班/家教">
+                                    <label class="form-check-label" for="support1">课外辅导班/家教</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="support2" name="家庭学习支持[]" value="学习类电子产品（平板/学习机等）">
+                                    <label class="form-check-label" for="support2">学习类电子产品（平板/学习机等）</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="support3" name="家庭学习支持[]" value="购买额外的习题集或参考书">
+                                    <label class="form-check-label" for="support3">购买额外的习题集或参考书</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="support4" name="家庭学习支持[]" value="付费夏令营/竞赛培训">
+                                    <label class="form-check-label" for="support4">付费夏令营/竞赛培训</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="support5" name="家庭学习支持[]" value="几乎没有额外投入">
+                                    <label class="form-check-label" for="support5">几乎没有额外投入</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="support6" name="家庭学习支持[]" value="其他">
+                                    <label class="form-check-label" for="support6">其他（请说明）</label>
+                                    <input type="text" class="form-control mt-1" id="support_other" name="家庭学习支持_其他说明">
+                                </div>
                             </div>
                             <div class="mb-3">
-                                <label for="additional_info" class="form-label">还有其他想要补充的信息吗？</label>
-                                <textarea class="form-control" id="additional_info" name="还有其他想要补充的信息吗？" rows="3"></textarea>
+                                <label for="parental_involvement" class="form-label">17. 家长对你的学业参与方式更接近哪一种？<span class="text-danger">*</span></label>
+                                <select class="form-select" id="parental_involvement" name="家长对你的学业参与方式更接近哪一种？" required>
+                                    <option value="" selected disabled>请选择</option>
+                                    <option value="主动提供资源并定期沟通学习情况">主动提供资源并定期沟通学习情况</option>
+                                    <option value="偶尔过问，主要靠你自己安排">偶尔过问，主要靠你自己安排</option>
+                                    <option value="很少干涉，完全自主管理">很少干涉，完全自主管理</option>
+                                </select>
+                                <div class="invalid-feedback">请选择家长的参与方式</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="mbti" class="form-label">18. 你的MBTI人格类型是什么？<span class="text-danger">*</span></label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="你的MBTI人格类型是什么？" id="mbti_known" value="已测过" required>
+                                    <label class="form-check-label" for="mbti_known">测过MBTI，结果是：</label>
+                                    <input type="text" class="form-control mt-1" id="mbti_result" name="MBTI测试结果" placeholder="请填写16型人格结果，如INTJ、ENFP等">
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="你的MBTI人格类型是什么？" id="mbti_willing" value="没测过，但愿意现在尝试">
+                                    <label class="form-check-label" for="mbti_willing">没测过，但愿意现在尝试（免费测试链接：<a href="http://free.csmbti.com/" target="_blank">http://free.csmbti.com/</a>）</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="你的MBTI人格类型是什么？" id="mbti_unwilling" value="没测过，暂时不想尝试">
+                                    <label class="form-check-label" for="mbti_unwilling">没测过，暂时不想尝试</label>
+                                </div>
+                                <div class="invalid-feedback">请选择您的MBTI情况</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="influencing_factors" class="form-label">19. 你认为哪些因素可能影响你的学习效果？<span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="influencing_factors" name="你认为哪些因素可能影响你的学习效果？" rows="3" required></textarea>
+                                <div class="form-text">如时间、资源、环境等</div>
+                                <div class="invalid-feedback">请填写影响您学习的因素</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="self_summary" class="form-label">20. 请你对自己的学习现状做一个总结<span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="self_summary" name="请你对自己的学习现状做一个总结" rows="4" required></textarea>
+                                <div class="form-text">如个人优点、缺点；最希望提升的能力等</div>
+                                <div class="invalid-feedback">请对您的学习现状做一个总结</div>
                             </div>
                         </div>
                     </div>

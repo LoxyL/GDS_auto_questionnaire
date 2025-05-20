@@ -42,6 +42,66 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    // 处理MBTI单选框逻辑
+    const mbtiRadios = document.querySelectorAll('[name="你的MBTI人格类型是什么？"]');
+    const mbtiResultField = document.getElementById('mbti_result');
+    
+    if (mbtiRadios.length > 0 && mbtiResultField) {
+        mbtiRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.id === 'mbti_known') {
+                    mbtiResultField.setAttribute('required', 'required');
+                    mbtiResultField.focus();
+                } else {
+                    mbtiResultField.removeAttribute('required');
+                }
+            });
+        });
+        
+        // 初始检查
+        if (document.getElementById('mbti_known').checked) {
+            mbtiResultField.setAttribute('required', 'required');
+        }
+    }
+    
+    // 处理多选框验证
+    const checkboxesGroups = document.querySelectorAll('.form-check-input[type="checkbox"][name$="[]"]');
+    const checkboxGroupNames = new Set();
+    
+    checkboxesGroups.forEach(checkbox => {
+        const name = checkbox.getAttribute('name');
+        checkboxGroupNames.add(name);
+        
+        checkbox.addEventListener('change', function() {
+            validateCheckboxGroup(name);
+        });
+    });
+    
+    function validateCheckboxGroup(groupName) {
+        const checkboxes = document.querySelectorAll(`input[name="${groupName}"]`);
+        let isChecked = false;
+        
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                isChecked = true;
+            }
+        });
+        
+        const firstCheckbox = checkboxes[0];
+        if (firstCheckbox) {
+            if (!isChecked) {
+                firstCheckbox.setCustomValidity('请至少选择一项');
+            } else {
+                firstCheckbox.setCustomValidity('');
+            }
+        }
+    }
+    
+    // 初始检查所有多选框组
+    checkboxGroupNames.forEach(name => {
+        validateCheckboxGroup(name);
+    });
+    
     // 实现字数统计功能（如果需要）
     const textareas = document.querySelectorAll('textarea[maxlength]');
     textareas.forEach(textarea => {
