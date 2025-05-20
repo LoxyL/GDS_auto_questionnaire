@@ -41,6 +41,9 @@
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center no-print">
                 <h1 class="mb-0">个人学习分析报告</h1>
                 <div>
+                    <a href="{{ url_for('download_student_pdf', timestamp=timestamp, student_name=student_name) }}" class="btn btn-light me-2">
+                        <i class="bi bi-file-earmark-pdf"></i> 下载PDF
+                    </a>
                     <button class="btn btn-light" onclick="window.print()">
                         <i class="bi bi-printer"></i> 打印报告
                     </button>
@@ -56,6 +59,9 @@
         <div class="d-flex justify-content-center gap-3 no-print">
             <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
                 <i class="bi bi-house"></i> 返回首页
+            </a>
+            <a href="{{ url_for('download_student_pdf', timestamp=timestamp, student_name=student_name) }}" class="btn btn-outline-success">
+                <i class="bi bi-file-earmark-pdf"></i> 下载PDF报告
             </a>
             <button class="btn btn-outline-primary" onclick="window.print()">
                 <i class="bi bi-printer"></i> 打印报告

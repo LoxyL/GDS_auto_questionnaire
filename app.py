@@ -62,7 +62,7 @@ def submit_questionnaire():
         
         # 分析问卷并生成报告
         try:
-            student_report_path, internal_report_path = analysis_engine.process_questionnaire(file_path)
+            student_report_path, internal_report_path, student_pdf_path, internal_pdf_path = analysis_engine.process_questionnaire(file_path)
             
             # 成功后重定向到结果页面
             return redirect(url_for('questionnaire_result', student_name=student_name, timestamp=timestamp))
@@ -198,6 +198,51 @@ def download_csv(filename):
         flash("文件不存在", "error")
         return redirect(url_for('admin_panel'))
 
+# 下载学生报告PDF
+@app.route('/report/student/pdf/<timestamp>_<student_name>')
+def download_student_pdf(timestamp, student_name):
+    """下载学生PDF报告"""
+    report_dir = 'output/student_reports'
+    report_files = os.listdir(report_dir)
+    matching_files = [f for f in report_files if f.startswith(f"{timestamp}_{student_name}") and f.endswith('.pdf')]
+    
+    if not matching_files:
+        flash("未找到相关PDF报告", "error")
+        return redirect(url_for('index'))
+    
+    # 获取最新的报告文件
+    report_file = sorted(matching_files)[-1]
+    report_path = os.path.join(report_dir, report_file)
+    
+    return send_file(report_path, 
+                     as_attachment=True, 
+                     download_name=f"{student_name}_学习分析报告.pdf")
+
+# 下载内部报告PDF
+@app.route('/admin/report/internal/pdf/<timestamp>_<student_name>')
+def download_internal_pdf(timestamp, student_name):
+    """下载内部PDF报告（仅限管理员）"""
+    # 在实际项目中应添加管理员验证
+    # if not is_admin():
+    #     flash("无权访问此资源", "error")
+    #     return redirect(url_for('index'))
+    
+    report_dir = 'output/internal_reports'
+    report_files = os.listdir(report_dir)
+    matching_files = [f for f in report_files if f.startswith(f"{timestamp}_{student_name}") and f.endswith('.pdf')]
+    
+    if not matching_files:
+        flash("未找到相关PDF报告", "error")
+        return redirect(url_for('admin_panel'))
+    
+    # 获取最新的报告文件
+    report_file = sorted(matching_files)[-1]
+    report_path = os.path.join(report_dir, report_file)
+    
+    return send_file(report_path, 
+                     as_attachment=True, 
+                     download_name=f"{student_name}_内部分析报告.pdf")
+
 # 重新分析问卷
 @app.route('/admin/reanalyze/<filename>')
 def reanalyze_questionnaire(filename):
@@ -210,7 +255,7 @@ def reanalyze_questionnaire(filename):
     file_path = os.path.join('original_questionnaire', secure_filename(filename))
     if os.path.exists(file_path):
         try:
-            student_report_path, internal_report_path = analysis_engine.process_questionnaire(file_path)
+            student_report_path, internal_report_path, student_pdf_path, internal_pdf_path = analysis_engine.process_questionnaire(file_path)
             flash("问卷重新分析成功", "success")
         except Exception as e:
             app.logger.error(f"重新分析失败: {str(e)}")

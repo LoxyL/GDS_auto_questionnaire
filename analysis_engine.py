@@ -6,6 +6,8 @@ from datetime import datetime
 import glob
 from pathlib import Path
 from dotenv import load_dotenv
+import markdown
+import weasyprint
 
 # 初始化环境变量
 load_dotenv()
@@ -277,16 +279,101 @@ def generate_internal_report(analysis, student_name):
     
     return report
 
+# 将Markdown转换为PDF
+def convert_markdown_to_pdf(markdown_content, pdf_path):
+    """将Markdown内容转换为PDF并保存"""
+    # 将Markdown转换为HTML
+    html_content = markdown.markdown(markdown_content, extensions=['tables', 'fenced_code'])
+    
+    # 添加基本样式的HTML封装
+    styled_html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>学习分析报告</title>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                margin: 2cm;
+            }}
+            h1, h2, h3 {{
+                color: #333;
+            }}
+            h1 {{
+                font-size: 24pt;
+                text-align: center;
+                margin-bottom: 1.5cm;
+            }}
+            h2 {{
+                font-size: 18pt;
+                border-bottom: 1px solid #ddd;
+                padding-bottom: 0.3cm;
+                margin-top: 1cm;
+            }}
+            h3 {{
+                font-size: 14pt;
+                margin-top: 0.8cm;
+            }}
+            p {{
+                text-align: justify;
+            }}
+            ul, ol {{
+                margin-left: 0.5cm;
+            }}
+            table {{
+                width: 100%;
+                border-collapse: collapse;
+                margin: 1cm 0;
+            }}
+            th, td {{
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }}
+            th {{
+                background-color: #f2f2f2;
+            }}
+            .footer {{
+                text-align: center;
+                font-size: 9pt;
+                color: #777;
+                margin-top: 2cm;
+            }}
+        </style>
+    </head>
+    <body>
+        {html_content}
+        <div class="footer">
+            <p>此报告由AI辅助生成，仅供参考。</p>
+        </div>
+    </body>
+    </html>
+    """
+    
+    # 使用WeasyPrint将HTML转换为PDF
+    weasyprint.HTML(string=styled_html).write_pdf(pdf_path)
+    
+    return pdf_path
+
 # 保存报告
 def save_report(content, filename, report_type):
-    """保存报告到指定目录"""
+    """保存报告到指定目录，同时保存MD和PDF格式"""
     directory = f"output/{report_type}_reports"
-    filepath = os.path.join(directory, filename)
+    md_filepath = os.path.join(directory, filename)
     
-    with open(filepath, 'w', encoding='utf-8') as f:
+    # 保存Markdown格式
+    with open(md_filepath, 'w', encoding='utf-8') as f:
         f.write(content)
     
-    return filepath
+    # 同时保存PDF格式
+    pdf_filename = filename.replace('.md', '.pdf')
+    pdf_filepath = os.path.join(directory, pdf_filename)
+    convert_markdown_to_pdf(content, pdf_filepath)
+    
+    return md_filepath, pdf_filepath
 
 # 处理问卷的主函数
 def process_questionnaire(questionnaire_file_path):
@@ -297,7 +384,7 @@ def process_questionnaire(questionnaire_file_path):
         questionnaire_file_path: 问卷CSV文件路径
         
     Returns:
-        tuple: (学生报告路径, 内部报告路径)
+        tuple: (学生报告路径, 内部报告路径, 学生PDF报告路径, 内部PDF报告路径)
     """
     # 确保目录存在
     create_directories()
@@ -350,23 +437,25 @@ def process_questionnaire(questionnaire_file_path):
         # 学生报告
         student_report = generate_student_report(analysis_result, student_name)
         student_filename = f"{timestamp}_{student_name}_学生报告.md"
-        student_report_path = save_report(student_report, student_filename, "student")
+        student_report_path, student_pdf_path = save_report(student_report, student_filename, "student")
         
         # 内部报告
         internal_report = generate_internal_report(analysis_result, student_name)
         internal_filename = f"{timestamp}_{student_name}_内部报告.md"
-        internal_report_path = save_report(internal_report, internal_filename, "internal")
+        internal_report_path, internal_pdf_path = save_report(internal_report, internal_filename, "internal")
         
         print(f"分析完成!")
-        print(f"学生报告已保存到: {student_report_path}")
-        print(f"内部报告已保存到: {internal_report_path}")
+        print(f"学生报告已保存到: {student_report_path} (MD格式)")
+        print(f"学生报告已保存到: {student_pdf_path} (PDF格式)")
+        print(f"内部报告已保存到: {internal_report_path} (MD格式)")
+        print(f"内部报告已保存到: {internal_pdf_path} (PDF格式)")
         
         # 可选：保存原始分析结果
         analysis_path = os.path.join("output", f"{timestamp}_{student_name}_分析结果.json")
         with open(analysis_path, 'w', encoding='utf-8') as f:
             json.dump(analysis_result, f, ensure_ascii=False, indent=2)
         
-        return student_report_path, internal_report_path
+        return student_report_path, internal_report_path, student_pdf_path, internal_pdf_path
         
     except Exception as e:
         print(f"问卷处理出错: {e}")
@@ -382,12 +471,14 @@ def batch_process_questionnaires(directory="original_questionnaire", pattern="*.
     
     for file in files:
         try:
-            student_report, internal_report = process_questionnaire(file)
+            student_report, internal_report, student_pdf, internal_pdf = process_questionnaire(file)
             results.append({
                 "file": file,
                 "success": True,
                 "student_report": student_report,
-                "internal_report": internal_report
+                "internal_report": internal_report,
+                "student_pdf": student_pdf,
+                "internal_pdf": internal_pdf
             })
         except Exception as e:
             results.append({
