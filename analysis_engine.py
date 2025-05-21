@@ -285,7 +285,7 @@ def convert_markdown_to_pdf(markdown_content, pdf_path):
     # 将Markdown转换为HTML
     html_content = markdown.markdown(markdown_content, extensions=['tables', 'fenced_code'])
     
-    # 添加基本样式的HTML封装
+    # 添加基本样式的HTML封装，使用支持中文的字体
     styled_html = f"""
     <!DOCTYPE html>
     <html>
@@ -294,12 +294,18 @@ def convert_markdown_to_pdf(markdown_content, pdf_path):
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>学习分析报告</title>
         <style>
+            @font-face {{
+                font-family: 'WQY';
+                src: local('WenQuanYi Micro Hei'), local('WenQuanYi Zen Hei');
+            }}
+            
             body {{
-                font-family: Arial, sans-serif;
+                font-family: 'WQY', 'WenQuanYi Micro Hei', 'WenQuanYi Zen Hei', Arial, sans-serif;
                 line-height: 1.6;
                 margin: 2cm;
             }}
             h1, h2, h3 {{
+                font-family: 'WQY', 'WenQuanYi Micro Hei', 'WenQuanYi Zen Hei', Arial, sans-serif;
                 color: #333;
             }}
             h1 {{
@@ -319,9 +325,13 @@ def convert_markdown_to_pdf(markdown_content, pdf_path):
             }}
             p {{
                 text-align: justify;
+                font-family: 'WQY', 'WenQuanYi Micro Hei', 'WenQuanYi Zen Hei', Arial, sans-serif;
             }}
             ul, ol {{
                 margin-left: 0.5cm;
+            }}
+            li {{
+                font-family: 'WQY', 'WenQuanYi Micro Hei', 'WenQuanYi Zen Hei', Arial, sans-serif;
             }}
             table {{
                 width: 100%;
@@ -332,6 +342,7 @@ def convert_markdown_to_pdf(markdown_content, pdf_path):
                 border: 1px solid #ddd;
                 padding: 8px;
                 text-align: left;
+                font-family: 'WQY', 'WenQuanYi Micro Hei', 'WenQuanYi Zen Hei', Arial, sans-serif;
             }}
             th {{
                 background-color: #f2f2f2;
@@ -341,6 +352,7 @@ def convert_markdown_to_pdf(markdown_content, pdf_path):
                 font-size: 9pt;
                 color: #777;
                 margin-top: 2cm;
+                font-family: 'WQY', 'WenQuanYi Micro Hei', 'WenQuanYi Zen Hei', Arial, sans-serif;
             }}
         </style>
     </head>
@@ -354,7 +366,17 @@ def convert_markdown_to_pdf(markdown_content, pdf_path):
     """
     
     # 使用WeasyPrint将HTML转换为PDF
-    weasyprint.HTML(string=styled_html).write_pdf(pdf_path)
+    try:
+        weasyprint.HTML(string=styled_html).write_pdf(pdf_path)
+        print(f"PDF报告已保存到: {pdf_path}")
+    except Exception as e:
+        print(f"生成PDF时发生错误: {e}")
+        # 如果出错，保存HTML文件用于调试
+        html_path = pdf_path.replace('.pdf', '_debug.html')
+        with open(html_path, 'w', encoding='utf-8') as f:
+            f.write(styled_html)
+        print(f"已保存调试用HTML到: {html_path}")
+        raise
     
     return pdf_path
 
