@@ -199,82 +199,60 @@ def generate_internal_report(analysis, student_name):
     """生成面向内部的MD格式报告"""
     report = f"""# {student_name} 学生情况内部分析报告
 
-## 基本信息
+## 一、学生性格
+结果分析：
+ {analysis['personality']['explanation']}
+数据来源及说明：
+- MBTI测试结果：{analysis['personality']['mbti']}（问卷对应题目）
+- {analysis['personality']['explanation']}
 
-- 学生姓名: {student_name}
-- 报告日期: {datetime.now().strftime('%Y年%m月%d日')}
+## 二、家庭条件及教育投入
+结果分析：
+ {analysis['family_status']['economic_level']}。{analysis['family_status']['family_support']}
+数据来源及说明：
+- {analysis['family_status']['explanation']}
 
-## 详细分析
+## 三、学习意愿
+结果分析：
+ {analysis['academic_status']['learning_attitude']}
+数据来源及说明：
+- {analysis['academic_status']['explanation']}
 
-### 1. 性格分析 (MBTI: {analysis['personality']['mbti']})
+## 四、学习天赋
+结果分析：
+ {analysis['academic_status']['learning_habits']}
+数据来源及说明：
+- {analysis['academic_status']['explanation']}
 
-{analysis['personality']['explanation']}
+## 五、学习成绩
+结果分析：
+ 当前综合成绩位于{analysis['academic_status']['current_level']}，{analysis['academic_status']['score_range']}。目标或能考取的学校类型：{analysis['academic_status']['target_schools']}。
+数据来源及说明：
+- {analysis['academic_status']['explanation']}
 
-### 2. 购买意愿分析
-
-**意愿等级**: {analysis['purchase_intention']['level']}
-
-**分析依据**: 
-{analysis['purchase_intention']['explanation']}
-
-### 3. 学习情况
-
-- **当前水平**: {analysis['academic_status']['current_level']}
-- **分数区间**: {analysis['academic_status']['score_range']}
-- **目标学校类型**: {analysis['academic_status']['target_schools']}
-
-**学习问题**:
-"""
+## 营销建议：
+- 产品推荐："""
     
-    for issue in analysis['academic_status']['learning_issues']:
-        report += f"- {issue}\n"
-    
-    report += f"""
-**学习态度**: {analysis['academic_status']['learning_attitude']}
-
-**学习习惯**: {analysis['academic_status']['learning_habits']}
-
-**分析依据**: 
-{analysis['academic_status']['explanation']}
-
-### 4. 家庭/经济情况
-
-- **经济水平**: {analysis['family_status']['economic_level']}
-- **家庭支持**: {analysis['family_status']['family_support']}
-
-**分析依据**:
-{analysis['family_status']['explanation']}
-
-### 5. 其他重要观察
-"""
-    
-    if analysis.get('additional_observations'):
-        for observation in analysis['additional_observations']:
-            report += f"- {observation}\n"
-    
-    report += f"""
-## 产品推荐
-
-基于以上分析，推荐以下产品：
-
-"""
     if analysis.get('recommended_products'):
         for product in analysis['recommended_products']:
-            report += f"- {product}\n"
+            report += f"  {product}, "
     
     report += f"""
+- 沟通风格：
+  - 使用符合学生{analysis['personality']['mbti']}性格特点的沟通方式
+  - 针对学生的学习问题提供解决方案
+- 话题切入："""
+    
+    if analysis.get('additional_observations'):
+        for observation in analysis['additional_observations'][:2]:
+            report += f"  {observation}\n  "
+    
+    report += f"""
+- 价格敏感度：根据家庭经济情况 "{analysis['family_status']['economic_level']}" 制定价格策略
+- 后续跟进：针对学生在{", ".join(analysis['academic_status']['learning_issues'][:2])}等方面的问题定期跟进
+
+**购买意愿**: {analysis['purchase_intention']['level']}
 **推荐理由**: {analysis.get('product_recommendation_reason', '无具体理由提供')}
-
-## 跟进建议
-
-根据学生情况，建议以下跟进方式：
-1. 针对性解决学生在{", ".join(analysis['academic_status']['learning_issues'][:2])}等方面的问题
-2. 重点推广适合该学生{analysis['personality']['mbti']}性格特点的产品特性
-3. 考虑该生家庭经济情况，合理设计价格策略
-
----
-
-*本报告仅供内部使用，请勿向学生或家长展示完整内容*
 """
     
     return report
@@ -390,10 +368,14 @@ def save_report(content, filename, report_type):
     with open(md_filepath, 'w', encoding='utf-8') as f:
         f.write(content)
     
-    # 同时保存PDF格式
-    pdf_filename = filename.replace('.md', '.pdf')
-    pdf_filepath = os.path.join(directory, pdf_filename)
-    convert_markdown_to_pdf(content, pdf_filepath)
+    try:
+        # 尝试同时保存PDF格式
+        pdf_filename = filename.replace('.md', '.pdf')
+        pdf_filepath = os.path.join(directory, pdf_filename)
+        convert_markdown_to_pdf(content, pdf_filepath)
+    except Exception as e:
+        print(f"PDF生成失败，但Markdown报告已保存成功: {e}")
+        pdf_filepath = None
     
     return md_filepath, pdf_filepath
 

@@ -267,7 +267,7 @@ def reanalyze_questionnaire(filename):
 
 # 启动应用
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 4000))
     
     # 绑定到0.0.0.0使应用可以从外部访问
     # 生产环境中应确保设置了适当的安全措施
