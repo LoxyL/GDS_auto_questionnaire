@@ -3,9 +3,10 @@ import json
 import time
 from datetime import datetime
 from pathlib import Path
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file, make_response
 from werkzeug.utils import secure_filename
 import pandas as pd
+import hashlib
 
 # 导入问卷分析和报告生成功能
 import analysis_engine
@@ -14,6 +15,34 @@ import analysis_engine
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev_key_change_in_production')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 限制上传文件大小为16MB
+
+# 管理员密码配置
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin123')  # 默认密码，生产环境应该修改
+
+# 辅助函数：格式化文件大小
+def format_file_size(size_bytes):
+    """将字节数转换为人类可读的文件大小格式"""
+    if size_bytes < 1024:
+        return f"{size_bytes} B"
+    elif size_bytes < 1024 * 1024:
+        return f"{size_bytes / 1024:.1f} KB"
+    else:
+        return f"{size_bytes / (1024 * 1024):.1f} MB"
+
+# 注册模板过滤器
+app.jinja_env.filters['format_file_size'] = format_file_size
+
+# 辅助函数：生成密码哈希
+def generate_password_hash(password):
+    """生成密码的哈希值"""
+    return hashlib.sha256((password + app.secret_key).encode()).hexdigest()
+
+# 辅助函数：验证管理员权限
+def check_admin_auth():
+    """检查管理员权限"""
+    admin_hash = request.cookies.get('admin_auth')
+    expected_hash = generate_password_hash(ADMIN_PASSWORD)
+    return admin_hash == expected_hash
 
 # 确保必要的目录存在
 def ensure_directories():
@@ -60,96 +89,67 @@ def submit_questionnaire():
         file_path = os.path.join('original_questionnaire', filename)
         df.to_csv(file_path, index=False)
         
-        # 分析问卷并生成报告
+        # 异步分析问卷并生成报告（后台处理）
         try:
-            student_report_path, internal_report_path, student_pdf_path, internal_pdf_path = analysis_engine.process_questionnaire(file_path)
-            
-            # 成功后重定向到结果页面
-            return redirect(url_for('questionnaire_result', student_name=student_name, timestamp=timestamp))
-        
+            analysis_engine.process_questionnaire(file_path)
         except Exception as e:
             app.logger.error(f"问卷分析失败: {str(e)}")
-            flash(f"问卷已提交但分析失败: {str(e)}", "error")
-            return redirect(url_for('index'))
+            # 分析失败不影响用户体验，继续显示成功页面
+        
+        # 直接跳转到结果页面
+        return redirect(url_for('questionnaire_result', student_name=student_name))
     
     except Exception as e:
         app.logger.error(f"问卷提交处理错误: {str(e)}")
         flash(f"问卷提交失败: {str(e)}", "error")
         return redirect(url_for('index'))
 
-# 查看学生报告
-@app.route('/report/student/<timestamp>_<student_name>')
-def view_student_report(timestamp, student_name):
-    """显示学生报告"""
-    # 查找最匹配的报告文件
-    report_dir = 'output/student_reports'
-    report_files = os.listdir(report_dir)
-    matching_files = [f for f in report_files if f.startswith(f"{timestamp}_{student_name}")]
-    
-    if not matching_files:
-        flash("未找到相关报告", "error")
-        return redirect(url_for('index'))
-    
-    # 获取最新的报告文件
-    report_file = sorted(matching_files)[-1]
-    report_path = os.path.join(report_dir, report_file)
-    
-    # 读取报告内容
-    with open(report_path, 'r', encoding='utf-8') as f:
-        report_content = f.read()
-    
-    return render_template('student_report.html', 
-                           student_name=student_name,
-                           report_content=report_content,
-                           timestamp=timestamp)
-
-# 查看内部报告（需要管理员访问）
-@app.route('/admin/report/internal/<timestamp>_<student_name>')
-def view_internal_report(timestamp, student_name):
-    """显示内部报告（仅限管理员）"""
-    # 在实际项目中应添加管理员验证
-    # if not is_admin():
-    #     flash("无权访问此页面", "error")
-    #     return redirect(url_for('index'))
-    
-    # 查找最匹配的报告文件
-    report_dir = 'output/internal_reports'
-    report_files = os.listdir(report_dir)
-    matching_files = [f for f in report_files if f.startswith(f"{timestamp}_{student_name}")]
-    
-    if not matching_files:
-        flash("未找到相关报告", "error")
-        return redirect(url_for('index'))
-    
-    # 获取最新的报告文件
-    report_file = sorted(matching_files)[-1]
-    report_path = os.path.join(report_dir, report_file)
-    
-    # 读取报告内容
-    with open(report_path, 'r', encoding='utf-8') as f:
-        report_content = f.read()
-    
-    return render_template('internal_report.html', 
-                           student_name=student_name,
-                           report_content=report_content,
-                           timestamp=timestamp)
-
 # 问卷结果页面
-@app.route('/result/<student_name>/<timestamp>')
-def questionnaire_result(student_name, timestamp):
+@app.route('/result/<student_name>')
+def questionnaire_result(student_name):
     """显示问卷提交后的结果页面"""
-    return render_template('result.html', 
-                           student_name=student_name,
-                           timestamp=timestamp)
+    return render_template('result.html', student_name=student_name)
+
+# 管理员登录页面
+@app.route('/admin/login')
+def admin_login():
+    """显示管理员登录页面"""
+    return render_template('admin_login.html')
+
+# 管理员密码验证
+@app.route('/admin/auth', methods=['POST'])
+def admin_auth():
+    """处理管理员密码验证"""
+    password = request.form.get('password')
+    
+    if password == ADMIN_PASSWORD:
+        # 密码正确，设置cookie并重定向到管理面板
+        response = make_response(redirect(url_for('admin_panel')))
+        admin_hash = generate_password_hash(ADMIN_PASSWORD)
+        response.set_cookie('admin_auth', admin_hash, max_age=60*60*24)  # 有效期24小时
+        flash("登录成功", "success")
+        return response
+    else:
+        # 密码错误
+        flash("密码错误，请重试", "error")
+        return redirect(url_for('admin_login'))
+
+# 管理员登出
+@app.route('/admin/logout')
+def admin_logout():
+    """管理员登出"""
+    response = make_response(redirect(url_for('index')))
+    response.set_cookie('admin_auth', '', expires=0)  # 清除cookie
+    flash("已成功登出", "info")
+    return response
 
 # 管理员面板
 @app.route('/admin')
 def admin_panel():
-    """管理员控制面板，显示所有提交的问卷"""
-    # 在实际项目中应添加管理员验证
-    # if not is_admin():
-    #     flash("无权访问此页面", "error")
-    #     return redirect(url_for('index'))
+    """管理员控制面板，显示所有提交的问卷和生成的报告"""
+    # 检查管理员权限
+    if not check_admin_auth():
+        return redirect(url_for('admin_login'))
     
     # 获取所有提交的问卷
     questionnaire_dir = 'original_questionnaire'
@@ -162,34 +162,81 @@ def admin_panel():
                 # 从文件名提取信息
                 parts = file.split('_')
                 if len(parts) >= 3:
-                    date_time = parts[0]
-                    student_name = '_'.join(parts[1:-1])  # 处理名字中可能包含下划线的情况
-                    
-                    # 检查是否已生成报告
-                    student_report_exists = any(f.startswith(f"{date_time}_{student_name}") for f in os.listdir('output/student_reports'))
-                    internal_report_exists = any(f.startswith(f"{date_time}_{student_name}") for f in os.listdir('output/internal_reports'))
+                    date_time = parts[0] + '_' + parts[1]
+                    student_name = '_'.join(parts[2:-1])  # 处理名字中可能包含下划线的情况
                     
                     questionnaires.append({
                         'file': file,
                         'student_name': student_name,
-                        'timestamp': date_time,
-                        'student_report_exists': student_report_exists,
-                        'internal_report_exists': internal_report_exists
+                        'timestamp': date_time
                     })
     
     # 按时间戳排序，最新的在前面
     questionnaires.sort(key=lambda x: x['timestamp'], reverse=True)
     
-    return render_template('admin.html', questionnaires=questionnaires)
+    # 获取所有生成的报告文件
+    reports = []
+    
+    # 扫描学生报告
+    student_reports_dir = 'output/student_reports'
+    if os.path.exists(student_reports_dir):
+        files = os.listdir(student_reports_dir)
+        for file in files:
+            if file.endswith(('.md', '.pdf')):
+                # 解析文件名: timestamp_studentname_学生报告.format
+                if '学生报告' in file:
+                    parts = file.split('_')
+                    if len(parts) >= 3:
+                        timestamp = parts[0] + '_' + parts[1]
+                        student_name = '_'.join(parts[2:]).replace('_学生报告.md', '').replace('_学生报告.pdf', '')
+                        file_format = file.split('.')[-1]
+                        
+                        reports.append({
+                            'file': file,
+                            'student_name': student_name,
+                            'timestamp': timestamp,
+                            'type': '学生报告',
+                            'format': file_format,
+                            'category': 'student',
+                            'size': os.path.getsize(os.path.join(student_reports_dir, file))
+                        })
+    
+    # 扫描内部报告
+    internal_reports_dir = 'output/internal_reports'
+    if os.path.exists(internal_reports_dir):
+        files = os.listdir(internal_reports_dir)
+        for file in files:
+            if file.endswith(('.md', '.pdf')):
+                # 解析文件名: timestamp_studentname_内部报告.format
+                if '内部报告' in file:
+                    parts = file.split('_')
+                    if len(parts) >= 3:
+                        timestamp = parts[0] + '_' + parts[1]
+                        student_name = '_'.join(parts[2:]).replace('_内部报告.md', '').replace('_内部报告.pdf', '')
+                        file_format = file.split('.')[-1]
+                        
+                        reports.append({
+                            'file': file,
+                            'student_name': student_name,
+                            'timestamp': timestamp,
+                            'type': '内部报告',
+                            'format': file_format,
+                            'category': 'internal',
+                            'size': os.path.getsize(os.path.join(internal_reports_dir, file))
+                        })
+    
+    # 按时间戳排序，最新的在前面
+    reports.sort(key=lambda x: x['timestamp'], reverse=True)
+    
+    return render_template('admin.html', questionnaires=questionnaires, reports=reports)
 
 # 下载CSV文件
 @app.route('/admin/download/<filename>')
 def download_csv(filename):
     """下载原始问卷CSV文件"""
-    # 在实际项目中应添加管理员验证
-    # if not is_admin():
-    #     flash("无权访问此资源", "error")
-    #     return redirect(url_for('index'))
+    # 检查管理员权限
+    if not check_admin_auth():
+        return redirect(url_for('admin_login'))
     
     file_path = os.path.join('original_questionnaire', secure_filename(filename))
     if os.path.exists(file_path):
@@ -198,64 +245,18 @@ def download_csv(filename):
         flash("文件不存在", "error")
         return redirect(url_for('admin_panel'))
 
-# 下载学生报告PDF
-@app.route('/report/student/pdf/<timestamp>_<student_name>')
-def download_student_pdf(timestamp, student_name):
-    """下载学生PDF报告"""
-    report_dir = 'output/student_reports'
-    report_files = os.listdir(report_dir)
-    matching_files = [f for f in report_files if f.startswith(f"{timestamp}_{student_name}") and f.endswith('.pdf')]
-    
-    if not matching_files:
-        flash("未找到相关PDF报告", "error")
-        return redirect(url_for('index'))
-    
-    # 获取最新的报告文件
-    report_file = sorted(matching_files)[-1]
-    report_path = os.path.join(report_dir, report_file)
-    
-    return send_file(report_path, 
-                     as_attachment=True, 
-                     download_name=f"{student_name}_学习分析报告.pdf")
-
-# 下载内部报告PDF
-@app.route('/admin/report/internal/pdf/<timestamp>_<student_name>')
-def download_internal_pdf(timestamp, student_name):
-    """下载内部PDF报告（仅限管理员）"""
-    # 在实际项目中应添加管理员验证
-    # if not is_admin():
-    #     flash("无权访问此资源", "error")
-    #     return redirect(url_for('index'))
-    
-    report_dir = 'output/internal_reports'
-    report_files = os.listdir(report_dir)
-    matching_files = [f for f in report_files if f.startswith(f"{timestamp}_{student_name}") and f.endswith('.pdf')]
-    
-    if not matching_files:
-        flash("未找到相关PDF报告", "error")
-        return redirect(url_for('admin_panel'))
-    
-    # 获取最新的报告文件
-    report_file = sorted(matching_files)[-1]
-    report_path = os.path.join(report_dir, report_file)
-    
-    return send_file(report_path, 
-                     as_attachment=True, 
-                     download_name=f"{student_name}_内部分析报告.pdf")
-
 # 重新分析问卷
 @app.route('/admin/reanalyze/<filename>')
 def reanalyze_questionnaire(filename):
     """重新分析已提交的问卷"""
-    # 在实际项目中应添加管理员验证
-    # if not is_admin():
-    #     flash("无权执行此操作", "error")
-    #     return redirect(url_for('index'))
+    # 检查管理员权限
+    if not check_admin_auth():
+        return redirect(url_for('admin_login'))
     
     file_path = os.path.join('original_questionnaire', secure_filename(filename))
     if os.path.exists(file_path):
         try:
-            student_report_path, internal_report_path, student_pdf_path, internal_pdf_path = analysis_engine.process_questionnaire(file_path)
+            analysis_engine.process_questionnaire(file_path)
             flash("问卷重新分析成功", "success")
         except Exception as e:
             app.logger.error(f"重新分析失败: {str(e)}")
@@ -264,6 +265,41 @@ def reanalyze_questionnaire(filename):
         flash("文件不存在", "error")
     
     return redirect(url_for('admin_panel'))
+
+# 下载报告文件
+@app.route('/admin/download/report/<category>/<filename>')
+def download_report(category, filename):
+    """下载报告文件"""
+    # 检查管理员权限
+    if not check_admin_auth():
+        return redirect(url_for('admin_login'))
+    
+    # 安全检查：防止路径遍历攻击
+    if '..' in filename or filename.startswith('/') or '\\' in filename:
+        flash("非法文件名", "error")
+        return redirect(url_for('admin_panel'))
+    
+    if category == 'student':
+        file_path = os.path.join('output/student_reports', filename)
+    elif category == 'internal':
+        file_path = os.path.join('output/internal_reports', filename)
+    else:
+        flash("无效的报告类型", "error")
+        return redirect(url_for('admin_panel'))
+    
+    # 确保文件路径在预期的目录内
+    expected_dir = os.path.abspath('output/' + ('student_reports' if category == 'student' else 'internal_reports'))
+    actual_path = os.path.abspath(file_path)
+    
+    if not actual_path.startswith(expected_dir):
+        flash("非法文件路径", "error")
+        return redirect(url_for('admin_panel'))
+    
+    if os.path.exists(file_path):
+        return send_file(file_path, as_attachment=True)
+    else:
+        flash("文件不存在", "error")
+        return redirect(url_for('admin_panel'))
 
 # 启动应用
 if __name__ == '__main__':
