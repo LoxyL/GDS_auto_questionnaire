@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>问卷系统 - 路由选择</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .admin-link {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .admin-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .admin-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            text-align: left;
+        }
+        
+        .info-box h4 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        
+        .info-box p {
+            margin-bottom: 0;
+            color: #666;
+        }
+        
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        
+        .flash {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        
+        .flash.error {
+            background-color: #ffe6e6;
+            color: #d63384;
+            border: 1px solid #ffb3b3;
+        }
+        
+        .flash.success {
+            background-color: #e6ffe6;
+            color: #28a745;
+            border: 1px solid #b3ffb3;
+        }
+        
+        .flash.info {
+            background-color: #e6f3ff;
+            color: #17a2b8;
+            border: 1px solid #b3d9ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">📋 问卷系统</div>
+        <div class="subtitle">请输入路由编号来访问对应的问卷</div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <div class="info-box">
+            <h4>使用说明</h4>
+            <p>请输入您收到的路由编号来访问对应的问卷。</p>
+            <p><strong>重要提醒：</strong>只能使用已创建的路由编号，无法自动创建新路由。</p>
+            <p><strong>标准路由编号：</strong>16位随机字符（如：aB3kR9mN7qW2sT4v）</p>
+            <p><strong>兼容格式：</strong>也支持自定义编号（如：abc、class1、group-a等）</p>
+            <p>如果提示"路由编号不存在"，请联系管理员获取正确的路由编号。</p>
+        </div>
+        
+        <form id="routeForm" onsubmit="navigateToRoute(event)">
+            <div class="form-group">
+                <label for="route_id">路由编号</label>
+                <input type="text" id="route_id" name="route_id" required 
+                       placeholder="请输入16位路由编号，如：aB3kR9mN7qW2sT4v" 
+                       pattern="[a-zA-Z0-9_-]+" 
+                       title="只能包含字母、数字、下划线和连字符"
+                       maxlength="50">
+            </div>
+            
+            <button type="submit" class="btn">进入问卷</button>
+        </form>
+        
+        <div class="admin-link">
+            <a href="{{ url_for('admin_login') }}">管理员登录</a>
+        </div>
+    </div>
+
+    <script>
+        function navigateToRoute(event) {
+            event.preventDefault();
+            const routeId = document.getElementById('route_id').value.trim();
+            if (routeId) {
+                window.location.href = '/' + encodeURIComponent(routeId);
+            }
+        }
+        
+        // 自动聚焦到输入框
+        document.getElementById('route_id').focus();
+    </script>
+</body>
+</html> 

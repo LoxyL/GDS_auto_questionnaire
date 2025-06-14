@@ -26,12 +26,20 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 # 创建输出目录
-def create_directories():
+def create_directories(route_id=None):
     """创建必要的文件夹"""
-    os.makedirs("output/student_reports", exist_ok=True)
-    os.makedirs("output/internal_reports", exist_ok=True)
-    os.makedirs("original_questionnaire", exist_ok=True)
-    logger.info("创建输出目录完成")
+    if route_id:
+        # 为特定路由创建目录
+        os.makedirs(f"output/{route_id}/student_reports", exist_ok=True)
+        os.makedirs(f"output/{route_id}/internal_reports", exist_ok=True)
+        os.makedirs(f"original_questionnaire/{route_id}", exist_ok=True)
+        logger.info(f"为路由 {route_id} 创建输出目录完成")
+    else:
+        # 创建基础目录（向后兼容）
+        os.makedirs("output/student_reports", exist_ok=True)
+        os.makedirs("output/internal_reports", exist_ok=True)
+        os.makedirs("original_questionnaire", exist_ok=True)
+        logger.info("创建输出目录完成")
 
 # 将问卷数据转换为易于阅读的格式
 def format_questionnaire_data(df):
@@ -76,7 +84,7 @@ def generate_reports(formatted_data, student_name, api_key, base_url, model="gpt
 1. 推荐产品（约200–300字）  
    - 指出首选产品类型及核心推荐理由（需结合性格与行为特征，可供选择的只有2个选择：1V1课程或计划类产品）。  
 2. 沟通话术风格（约200–300字）  
-   - 指定1~2种话术风格（如“理性目标型”“陪伴式”“情感激励型”），并给出一句示例开场白和后续话题的方向说明。  
+   - 指定1~2种话术风格（如"理性目标型""陪伴式""情感激励型"），并给出一句示例开场白和后续话题的方向说明。  
 3. 话题切入（约400–600字）  
    - 列出 2–3 个最有效的话题切入点。  
 4. 价值点强调（约400–600字）  
@@ -96,7 +104,7 @@ def generate_reports(formatted_data, student_name, api_key, base_url, model="gpt
 
 输出要求  
 - 全文使用简体中文，语言自然流畅、逻辑严谨。  
-- 必须在“数据来源及说明”中引用具体的问卷字段。  
+- 必须在"数据来源及说明"中引用具体的问卷字段。  
 
 具体的示例：
 ```plaintext
@@ -126,49 +134,49 @@ def generate_reports(formatted_data, student_name, api_key, base_url, model="gpt
 建议首推线上**1对1辅导**。
 
 - **满足性格特点**：ESFP 类型的代代外向活泼,更喜欢与老师互动，即时反馈，单向视频课或纯规训课容易让他产生厌倦；1对1 模式可随时提问，增强节奏，更能激发学习积极性。
-- **补充执行短板**：他自主学习时间有限，缺乏持续规划，一对一辅导中辅导老师可为他做“当下打卡+课后督促”，帮助他按节点完成学习任务，避免拖延。
+- **补充执行短板**：他自主学习时间有限，缺乏持续规划，一对一辅导中辅导老师可为他做"当下打卡+课后督促"，帮助他按节点完成学习任务，避免拖延。
 - **提高续费意愿**：互动式教学让他感受到陪伴与成就感，学习效果更直观，家长更愿意持续投入；相较于规训课的单一内容，他可在1对1中体验到多样化教学方案，续费黏性更高。
 
 ### 2. 沟通话术风格：
 代代属于 ESFP，外向且追求新鲜感，交流中应以陪伴式情感+轻松活泼为主。开场可这样说：
 
-> 1. “代代同学，听说你平时学习节奏快，但有时候会卡在一些小难题上？没关系，我和你一起，随时帮你搞定困难，还能带你玩转各种学习小技巧，让每一次刷题都像闯关游戏一样——有问题马上陪你一起攻克！”
+> 1. "代代同学，听说你平时学习节奏快，但有时候会卡在一些小难题上？没关系，我和你一起，随时帮你搞定困难，还能带你玩转各种学习小技巧，让每一次刷题都像闯关游戏一样——有问题马上陪你一起攻克！"
 
-> **“语言要真诚、有温度，采用‘我们’‘一起’‘陪伴’等词，让他感觉到不是上课，而是有人在身边督促并支持。避免过度堆砌教材式的描述，增加入一些日常生活的比喻（比如‘像打游戏过关一样’），承接他的兴趣点，增强信任与使用体验预期。”**
+> **"语言要真诚、有温度，采用'我们''一起''陪伴'等词，让他感觉到不是上课，而是有人在身边督促并支持。避免过度堆砌教材式的描述，增加入一些日常生活的比喻（比如'像打游戏过关一样'），承接他的兴趣点，增强信任与使用体验预期。"**
 
 ### 3. 话题切入：
 - **目标与愿景**  
-  先聊聊他对“大城市之旅”的向往：
+  先聊聊他对"大城市之旅"的向往：
 
-  > - “你提到希望通过学习去大城市中见识风景和机会，能具体分享一下最想体验的事吗？是想去科技展、还是想在大厦的馆深夜自习？”
+  > - "你提到希望通过学习去大城市中见识风景和机会，能具体分享一下最想体验的事吗？是想去科技展、还是想在大厦的馆深夜自习？"
 
-  通过这种开放式提问，引导他把“见识”转化为学习动力。接着结合关联到课程：“我们的1对1辅导不仅帮你提高分数，每次课后还会给你推荐大城市名校学长笔记和学习攻略，让你一步步贴近理想的未来生活。”
+  通过这种开放式提问，引导他把"见识"转化为学习动力。接着结合关联到课程："我们的1对1辅导不仅帮你提高分数，每次课后还会给你推荐大城市名校学长笔记和学习攻略，让你一步步贴近理想的未来生活。"
 
 ### 4. 学习难点与学科兴趣
-针对他“理科好，物理尤佳”的优势，讨论具体痛点：
-> - “你在物理哪部分最有成就感？力学、光学还是电学？有没有遇到特别头疼的题型？”
+针对他"理科好，物理尤佳"的优势，讨论具体痛点：
+> - "你在物理哪部分最有成就感？力学、光学还是电学？有没有遇到特别头疼的题型？"
 
-> **“让他描述真实感受后，示范如何在1对1中进行‘题型拆解+公式归纳’，再给出一个小练习，让他当场体验老师讲解与互动的效果。”**
+> **"让他描述真实感受后，示范如何在1对1中进行'题型拆解+公式归纳'，再给出一个小练习，让他当场体验老师讲解与互动的效果。"**
 
 ### 5. 时间管理与课外利用
 由于每日自习时间仅30–60分钟，可探讨如何在碎片化时间高效学习：
 
-> - “下午放学后到晚上自习开始之前的这段半小时，你最习惯做什么？如果把它用来背公式或刷错题，你会愿意试试我们的‘5分钟提分法’吗？”
+> - "下午放学后到晚上自习开始之前的这段半小时，你最习惯做什么？如果把它用来背公式或刷错题，你会愿意试试我们的'5分钟提分法'吗？"
 
-> - **“介绍课程中专门设计的‘日常打卡+错题本’功能，说明每个碎片时段都能有实效，让他觉得课程设计贴合自己的生活节奏。”**
+> - **"介绍课程中专门设计的'日常打卡+错题本'功能，说明每个碎片时段都能有实效，让他觉得课程设计贴合自己的生活节奏。"**
 
 通过以上具体讨论方向，销售人员可以：
 - **a. 记录关键词**：大城市、物理、碎片化时间、游戏化闯关；
 - **b. 提供设计演示**：准备对应场景的教学演示或案例分享；
-- **c. 动态调整话术**：随时将他的回复与产品功能一一对应，做到“听我所需，给我所想”。
+- **c. 动态调整话术**：随时将他的回复与产品功能一一对应，做到"听我所需，给我所想"。
 
 ### 价值点强调：
 - **个性化学习计划与监督**  
   我们会根据代代的学科偏好和目标，将每周学习计划细分到每日任务，并由专属老师实时跟进完成情况；
 - **灵活在线资源**  
-  除1对1主课外，还可免费使用为 ESFP 设计的“学习游戏包”、互动直播答疑，让学习形式更丰富、有趣；
+  除1对1主课外，还可免费使用为 ESFP 设计的"学习游戏包"、互动直播答疑，让学习形式更丰富、有趣；
 - **增强独立解决问题能力**  
-  老师不仅讲解答案，还会教授“解题思路模板”与“逻辑拆解法”，帮助代代在面对新题时能快速上手，不再依赖别人；
+  老师不仅讲解答案，还会教授"解题思路模板"与"逻辑拆解法"，帮助代代在面对新题时能快速上手，不再依赖别人；
 - **打通升学与职业通道**  
   课程结束后，代代有机会获得校内竞赛、夏令营或名校学长一对一指导资源推荐，为未来申请名校和职业发展奠定基础。
 
@@ -180,7 +188,7 @@ def generate_reports(formatted_data, student_name, api_key, base_url, model="gpt
 
 ### 学生性格
 
-**结果分析**：小潘是INFP类型，追求内心和谐，喜欢依自己���方式进行自发性学习，可能会对现实的高强度和标准化教学缺乏兴趣，需要自主和价值导向的学习环境来支持他的成长。
+**结果分析**：小潘是INFP类型，追求内心和谐，喜欢依自己的方式进行自发性学习，可能会对现实的高强度和标准化教学缺乏兴趣，需要自主和价值导向的学习环境来支持他的成长。
 
 **数据来源及说明**：
 
@@ -487,9 +495,16 @@ def convert_markdown_to_pdf(markdown_content, pdf_path):
     return pdf_path
 
 # 保存报告
-def save_report(content, filename, report_type):
+def save_report(content, filename, report_type, route_id=None):
     """保存报告到指定目录，同时保存MD和PDF格式"""
-    directory = f"output/{report_type}_reports"
+    if route_id:
+        directory = f"output/{route_id}/{report_type}_reports"
+    else:
+        directory = f"output/{report_type}_reports"
+    
+    # 确保目录存在
+    os.makedirs(directory, exist_ok=True)
+    
     md_filepath = os.path.join(directory, filename)
     
     # 保存Markdown格式
@@ -508,18 +523,19 @@ def save_report(content, filename, report_type):
     return md_filepath, pdf_filepath
 
 # 处理问卷的主函数
-def process_questionnaire(questionnaire_file_path):
+def process_questionnaire(questionnaire_file_path, route_id=None):
     """
     处理单个问卷文件，生成分析报告
     
     Args:
         questionnaire_file_path: 问卷CSV文件路径
+        route_id: 路由编号，用于组织文件结构
         
     Returns:
         tuple: (学生报告路径, 内部报告路径, 学生PDF报告路径, 内部PDF报告路径)
     """
     # 确保目录存在
-    create_directories()
+    create_directories(route_id)
     
     try:
         # 读取问卷数据
@@ -568,11 +584,11 @@ def process_questionnaire(questionnaire_file_path):
         
         # 保存学生报告
         student_filename = f"{timestamp}_{student_name}_学生报告.md"
-        student_report_path, student_pdf_path = save_report(student_report, student_filename, "student")
+        student_report_path, student_pdf_path = save_report(student_report, student_filename, "student", route_id)
         
         # 保存内部报告
         internal_filename = f"{timestamp}_{student_name}_内部报告.md"
-        internal_report_path, internal_pdf_path = save_report(internal_report, internal_filename, "internal")
+        internal_report_path, internal_pdf_path = save_report(internal_report, internal_filename, "internal", route_id)
         
         logger.info(f"报告生成完成!")
         logger.info(f"学生报告已保存到: {student_report_path} (MD格式)")
@@ -589,8 +605,12 @@ def process_questionnaire(questionnaire_file_path):
         raise Exception(f"问卷处理失败: {str(e)}")
 
 # 批量处理问卷
-def batch_process_questionnaires(directory="original_questionnaire", pattern="*.csv"):
+def batch_process_questionnaires(directory="original_questionnaire", pattern="*.csv", route_id=None):
     """批量处理目录中的所有问卷文件"""
+    if route_id:
+        # 处理特定路由的问卷
+        directory = os.path.join(directory, route_id)
+    
     files = glob.glob(os.path.join(directory, pattern))
     results = []
     
@@ -598,7 +618,7 @@ def batch_process_questionnaires(directory="original_questionnaire", pattern="*.
     
     for file in files:
         try:
-            student_report, internal_report, student_pdf, internal_pdf = process_questionnaire(file)
+            student_report, internal_report, student_pdf, internal_pdf = process_questionnaire(file, route_id)
             results.append({
                 "file": file,
                 "success": True,
@@ -621,6 +641,7 @@ def batch_process_questionnaires(directory="original_questionnaire", pattern="*.
     
     summary = (f"问卷处理完成报告\n"
                f"处理时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+               f"路由编号: {route_id if route_id else '默认'}\n"
                f"总计问卷: {len(results)}\n"
                f"成功处理: {success_count}\n"
                f"处理失败: {failure_count}\n\n"
@@ -633,7 +654,13 @@ def batch_process_questionnaires(directory="original_questionnaire", pattern="*.
             summary += f"✗ {os.path.basename(result['file'])} - 失败: {result['error']}\n"
     
     # 保存处理报告
-    report_path = os.path.join("output", f"batch_processing_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt")
+    if route_id:
+        report_dir = f"output/{route_id}"
+        os.makedirs(report_dir, exist_ok=True)
+        report_path = os.path.join(report_dir, f"batch_processing_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt")
+    else:
+        report_path = os.path.join("output", f"batch_processing_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt")
+    
     with open(report_path, 'w', encoding='utf-8') as f:
         f.write(summary)
     
@@ -648,6 +675,7 @@ if __name__ == "__main__":
     parser.add_argument('--file', help='单个问卷文件路径')
     parser.add_argument('--dir', default='original_questionnaire', help='批量处理的问卷目录')
     parser.add_argument('--pattern', default='*.csv', help='文件匹配模式，如*.csv或*.xlsx')
+    parser.add_argument('--route', help='路由编号，用于组织文件结构')
     args = parser.parse_args()
     
     # 确保环境变量已加载
@@ -667,10 +695,10 @@ if __name__ == "__main__":
     if args.file:
         # 处理单个文件
         try:
-            process_questionnaire(args.file)
+            process_questionnaire(args.file, args.route)
             print(f"文件处理完成: {args.file}")
         except Exception as e:
             print(f"处理失败: {e}")
     else:
         # 批量处理
-        batch_process_questionnaires(args.dir, args.pattern) 
+        batch_process_questionnaires(args.dir, args.pattern, args.route) 
